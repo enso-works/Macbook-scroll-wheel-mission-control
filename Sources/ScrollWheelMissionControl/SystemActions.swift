@@ -41,11 +41,20 @@ enum SystemActions {
 
     /// Arrow-key hotkeys are registered with Ctrl + Fn, and function keys with Fn, so Fn is required to match.
     private static func postShortcut(_ key: CGKeyCode, flags: CGEventFlags = [.maskControl, .maskSecondaryFn]) {
-        let src = CGEventSource(stateID: .hidSystemState)
-        for isDown in [true, false] {
-            guard let event = CGEvent(keyboardEventSource: src, virtualKey: key, keyDown: isDown) else { continue }
-            event.flags = flags
-            event.post(tap: .cghidEventTap)
+        let initialFlags = CGEventSource.flagsState(.combinedSessionState)
+        guard let source = CGEventSource(stateID: .privateState) else { return }
+        let sequence = ShortcutSequence.events(for: key, flags: flags, initialFlags: initialFlags)
+
+        // Allocate the whole sequence first: an allocation failure must not leave only the
+        // modifier-down half of the shortcut posted to the system.
+        var events: [CGEvent] = []
+        for step in sequence {
+            guard let event = CGEvent(keyboardEventSource: source, virtualKey: step.keyCode,
+                                      keyDown: step.keyDown) else { return }
+            event.type = step.type
+            event.flags = step.flags
+            events.append(event)
         }
+        for event in events { event.post(tap: .cghidEventTap) }
     }
 }

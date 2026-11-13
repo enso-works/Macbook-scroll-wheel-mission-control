@@ -1,11 +1,15 @@
 APP := build/Scroll Wheel Mission Control.app
 VERSION ?= $(shell cat VERSION)
 
-.PHONY: app install dmg art screenshots clean
+.PHONY: app test install dmg art screenshots clean
 
 ## Build the universal app bundle into build/
 app:
 	VERSION=$(VERSION) ./scripts/build-app.sh
+
+## Check keyboard shortcut event sequences without posting system input
+test:
+	zsh Tests/run.sh
 
 ## Build and copy the app to /Applications
 install: app
