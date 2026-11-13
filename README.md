@@ -210,6 +210,7 @@ Requirements: macOS 13 or later and the Xcode Command Line Tools (`xcode-select 
 
 ```sh
 make app       # universal .app in build/
+make test      # keyboard shortcut event-sequence regression checks
 make install   # build and copy to /Applications
 make dmg       # release DMG and zip in dist/
 make art       # re-render the icon and README artwork
